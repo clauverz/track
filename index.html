@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Tracker Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .generated-link {
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .link-url {
+            background: #667eea;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        .copy-btn {
+            background: #48bb78;
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+            margin-top: 10px;
+        }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .analytics-table th,
+        .analytics-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .analytics-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .analytics-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Link Tracker Pro</h1>
+            <p>Create trackable links and monitor visitor locations in real-time</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>📊 Analytics Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalLinks">0</div>
+                        <div class="stat-label">Total Links</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalClicks">0</div>
+                        <div class="stat-label">Total Clicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="uniqueVisitors">0</div>
+                        <div class="stat-label">Unique Visitors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="topCountry">-</div>
+                        <div class="stat-label">Top Country</div>
+                    </div>
+                </div>
+
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Link</th>
+                            <th>Clicks</th>
+                            <th>Latest Click</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="linksTable">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #a0aec0; padding: 40px;">
+                                No tracking links created yet
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Create Tracking Link</h2>
+                <form id="linkForm">
+                    <div class="form-group">
+                        <label for="targetUrl">Target URL *</label>
+                        <input type="url" id="targetUrl" placeholder="https://example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="linkName">Link Name</label>
+                        <input type="text" id="linkName" placeholder="My Campaign Link">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" rows="3" placeholder="Optional description for this link"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">🚀 Create Tracking Link</button>
+                </form>
+
+                <div id="generatedLink" class="generated-link" style="display: none;">
+                    <h3>✅ Your Tracking Link is Ready!</h3>
+                    <div class="link-url" id="linkUrl"></div>
+                    <button class="btn copy-btn" onclick="copyLink()">📋 Copy Link</button>
+                    <div id="copyAlert"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2>🌍 Recent Visitor Activity</h2>
+            <div id="activityTable">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Link</th>
+                            <th>Location</th>
+                            <th>Country</th>
+                            <th>IP Address</th>
+                            <th>User Agent</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #a0aec0; padding: 40px;">
+                                No visitor activity yet
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // In-memory storage for demo purposes
+        let trackingLinks = {};
+        let clickData = {};
+        let linkCounter = 0;
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('linkForm').addEventListener('submit', createTrackingLink);
+            
+            // Handle clicks on tracking links (for demo purposes)
+            window.addEventListener('message', function(event) {
+                if (event.data.type === 'trackClick') {
+                    recordClick(event.data.linkId, event.data.location);
+                }
+            });
+        }
+
+        function createTrackingLink(e) {
+            e.preventDefault();
+            
+            const targetUrl = document.getElementById('targetUrl').value;
+            const linkName = document.getElementById('linkName').value || 'Untitled Link';
+            const description = document.getElementById('description').value;
+            
+            if (!targetUrl) {
+                showAlert('Please enter a valid target URL', 'error');
+                return;
+            }
+            
+            linkCounter++;
+            const linkId = 'link_' + linkCounter + '_' + Date.now();
+            
+            // Store link data
+            trackingLinks[linkId] = {
+                id: linkId,
+                name: linkName,
+                description: description,
+                targetUrl: targetUrl,
+                created: new Date(),
+                clicks: 0
+            };
+            
+            // Generate tracking URL (this would be your domain in production)
+            const trackingUrl = `${window.location.origin}/track/${linkId}`;
+            
+            // Show the generated link
+            document.getElementById('linkUrl').textContent = trackingUrl;
+            document.getElementById('generatedLink').style.display = 'block';
+            
+            // Update the links table
+            updateLinksTable();
+            updateStats();
+            
+            // Clear form
+            document.getElementById('linkForm').reset();
+            
+            showAlert('Tracking link created successfully!', 'success');
+        }
+
+        function copyLink() {
+            const linkUrl = document.getElementById('linkUrl').textContent;
+            navigator.clipboard.writeText(linkUrl).then(() => {
+                showCopyAlert('Link copied to clipboard!', 'success');
+            }).catch(() => {
+                showCopyAlert('Failed to copy link', 'error');
+            });
+        }
+
+        function showAlert(message, type) {
+            // You can implement a global alert system here
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+
+        function showCopyAlert(message, type) {
+            const alertDiv = document.getElementById('copyAlert');
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        function updateLinksTable() {
+            const tbody = document.getElementById('linksTable');
+            
+            if (Object.keys(trackingLinks).length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #a0aec0; padding: 40px;">
+                            No tracking links created yet
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = Object.values(trackingLinks).map(link => `
+                <tr>
+                    <td>
+                        <strong>${link.name}</strong><br>
+                        <small style="color: #718096;">${link.targetUrl}</small>
+                    </td>
+                    <td>${link.clicks}</td>
+                    <td>${link.clicks > 0 ? 'Recent' : 'Never'}</td>
+                    <td>
+                        <button onclick="viewLinkDetails('${link.id}')" style="padding: 4px 8px; font-size: 12px;" class="btn">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            const totalLinks = Object.keys(trackingLinks).length;
+            const totalClicks = Object.values(trackingLinks).reduce((sum, link) => sum + link.clicks, 0);
+            const uniqueVisitors = Object.keys(clickData).length;
+            
+            document.getElementById('totalLinks').textContent = totalLinks;
+            document.getElementById('totalClicks').textContent = totalClicks;
+            document.getElementById('uniqueVisitors').textContent = uniqueVisitors;
+            
+            // Calculate top country (simplified)
+            const countries = {};
+            Object.values(clickData).forEach(clicks => {
+                clicks.forEach(click => {
+                    const country = click.location.country || 'Unknown';
+                    countries[country] = (countries[country] || 0) + 1;
+                });
+            });
+            
+            const topCountry = Object.keys(countries).reduce((a, b) => countries[a] > countries[b] ? a : b, '-');
+            document.getElementById('topCountry').textContent = topCountry;
+        }
+
+        function simulateClick() {
+            if (Object.keys(trackingLinks).length === 0) {
+                showAlert('Create a tracking link first!', 'error');
+                return;
+            }
+            
+            // Simulate a click with fake geolocation data
+            const linkIds = Object.keys(trackingLinks);
+            const randomLinkId = linkIds[Math.floor(Math.random() * linkIds.length)];
+            
+            const fakeLocations = [
+                { city: 'New York', country: 'United States', lat: 40.7128, lng: -74.0060 },
+                { city: 'London', country: 'United Kingdom', lat: 51.5074, lng: -0.1278 },
+                { city: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503 },
+                { city: 'Sydney', country: 'Australia', lat: -33.8688, lng: 151.2093 },
+                { city: 'Berlin', country: 'Germany', lat: 52.5200, lng: 13.4050 }
+            ];
+            
+            const randomLocation = fakeLocations[Math.floor(Math.random() * fakeLocations.length)];
+            
+            recordClick(randomLinkId, randomLocation);
+        }
+
+        function recordClick(linkId, location) {
+            if (!trackingLinks[linkId]) return;
+            
+            // Update click count
+            trackingLinks[linkId].clicks++;
+            
+            // Store click data
+            if (!clickData[linkId]) {
+                clickData[linkId] = [];
+            }
+            
+            const clickInfo = {
+                timestamp: new Date(),
+                location: location,
+                ip: '192.168.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255),
+                userAgent: navigator.userAgent.substring(0, 50) + '...'
+            };
+            
+            clickData[linkId].push(clickInfo);
+            
+            // Update UI
+            updateLinksTable();
+            updateActivityTable();
+            updateStats();
+            
+            // In a real app, this would redirect to the target URL
+            console.log(`Click tracked for ${linkId}:`, clickInfo);
+        }
+
+        function updateActivityTable() {
+            const tbody = document.getElementById('activityTableBody');
+            const allClicks = [];
+            
+            // Collect all clicks from all links
+            Object.keys(clickData).forEach(linkId => {
+                clickData[linkId].forEach(click => {
+                    allClicks.push({
+                        ...click,
+                        linkId: linkId,
+                        linkName: trackingLinks[linkId]?.name || 'Unknown'
+                    });
+                });
+            });
+            
+            if (allClicks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #a0aec0; padding: 40px;">
+                            No visitor activity yet
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Sort by timestamp (most recent first)
+            allClicks.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            tbody.innerHTML = allClicks.slice(0, 10).map(click => `
+                <tr>
+                    <td>${new Date(click.timestamp).toLocaleString()}</td>
+                    <td>${click.linkName}</td>
+                    <td>${click.location.city}</td>
+                    <td>${click.location.country}</td>
+                    <td>${click.ip}</td>
+                    <td title="${click.userAgent}">${click.userAgent}</td>
+                </tr>
+            `).join('');
+        }
+
+        function viewLinkDetails(linkId) {
+            const link = trackingLinks[linkId];
+            const clicks = clickData[linkId] || [];
+            
+            alert(`Link: ${link.name}\nTarget: ${link.targetUrl}\nTotal Clicks: ${link.clicks}\nCreated: ${link.created.toLocaleDateString()}`);
+        }
+
+        // Add a demo button for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoButton = document.createElement('button');
+            demoButton.textContent = '🎭 Simulate Click (Demo)';
+            demoButton.className = 'btn';
+            demoButton.style.marginTop = '20px';
+            demoButton.onclick = simulateClick;
+            
+            document.querySelector('.card:last-child').appendChild(demoButton);
+        });
+    </script>
+</body>
+</html>
